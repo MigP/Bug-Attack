@@ -20,6 +20,8 @@ Lose enough health and you end up losing one of your lives. To spice it up, rand
 Despite all these obstacles, you are desperate for that river, and each time you reach it you get 50 points. It's just a shame that once you do, you'll be catapulted back to the other side of the road again.
 Good luck on your quest. And keep in mind that the more points you get the more difficult it will get to cross that road.
 
+## [Live Demo)(https://migp.github.io/Bug-Attack/)
+
  ## 4. Known issues
 
 As of now, there aren't any that I know of.
