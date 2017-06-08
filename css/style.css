@@ -1,0 +1,124 @@
+body {
+	text-align: center;
+	background-color: lightslategray;
+}
+
+p {
+	font: small-caps bold 2em "Comic Sans MS", cursive, sans-serif;
+	color: blue;
+	text-shadow: -1px -1px 1px #33332b, 2px 2px 1px #cecb96;
+}
+
+.logo {
+	position: fixed;
+	top: 0;
+	display: none;
+}
+
+.logo-img {
+	width: 50%;
+	height: 50%;
+}
+
+.gameStats {
+	position: fixed;
+	top: 120px;
+	left: 0;
+	padding: 10px;
+	font: small-caps bold 1.2em "Comic Sans MS", cursive, sans-serif;
+	text-shadow: -1px -1px 1px #33332b, 2px 2px 1px #cecb96;
+	display: flex;
+	flex-direction: column;
+	text-align: left;
+}
+
+.name {
+	color: blue;
+}
+
+.score {
+	color: crimson;
+}
+
+.lives {
+	color: lawngreen;
+}
+
+.health {
+	color: orange;
+	display: flex;
+}
+
+.healthBar {
+	background-color: orange;
+	display: block;
+	margin: 0.4em 0 0 0.2em;
+	height: 15px;
+	border: 1px solid black;
+	border-radius: 5px;
+}
+
+.popup {
+	display: none;
+	position: fixed;
+	z-index: 2;
+	border: 2px solid black;
+	box-shadow: 5px 5px 25px #000;
+	justify-content: center;
+	flex-direction: column;
+	padding: 5px;
+	border-radius: 30px
+}
+
+.charContainer {
+	width: 100%;
+	display: flex;
+}
+
+.selected {
+	border: 2px red solid;
+}
+
+.charPhoto {
+	width: 50%;
+	height: 50%;
+}
+
+.button {
+	margin: 5px;
+}
+
+.highScore {
+	display: none;
+	position: fixed;
+	border: 2px black solid;
+	width: 225px;
+	height: 200px;
+	left: 0;
+	top: 280px;
+	margin: 10px;
+	flex-wrap: wrap;
+	padding: 10px;
+	justify-content: center;
+}
+
+.scores {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	justify-content: space-between;
+	font: small-caps bold 1.1em "Comic Sans MS", cursive, sans-serif;
+	text-shadow: -1px -1px 1px #33332b, 1.2px 2px 1px #cecb96;
+	color: indigo;
+}
+
+.scoresTitle {
+	font-size: 1.2em;
+	color: darkred;
+}
+
+#help-close-button {
+	width: 52px;
+	height: 58px;
+	margin: auto;
+}
