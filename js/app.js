@@ -37,17 +37,21 @@ function getMoveCoords(keyPressed) {
     }
 }
 
+// Global variables for the player's move coords
+var moveX = 0, moveY = 0;
+
 // Player class
 var Player = function(name, sprite) {
-    var moveX = 0, moveY = 0;
-    var obj = {x: 3, y: 4, name: name, sprite: sprite, score: 0, lives: 5, health: 5, level: 1};
-    // Handles allowed pressed keys
-    obj.handleInput = function(keyPressed) {
-        if (keyPressed) {
-            moveX = getMoveCoords(keyPressed)[0];
-            moveY = getMoveCoords(keyPressed)[1];
-        }
-    },
+    var obj = Object.create(Player.prototype);
+    obj.x = 3;
+    obj.y = 4;
+    obj.name = name;
+    obj.sprite = sprite;
+    obj.score = 0;
+    obj.lives = 5;
+    obj.health = 5;
+    obj.level = 1;
+
     // Updates the player's position
     obj.update = function() {
         // Moves horizontally only within these limits
@@ -66,180 +70,200 @@ var Player = function(name, sprite) {
         // Looks for bonuses on the tile where the player moved to
         player.checkForBonus();
     },
-    // Checks if player enters a tile with a bonus on it and calls the function to collect the bonus if necessary
-    obj.checkForBonus = function() {
-        for (var bonuses = 0; bonuses < allBonuses.length; bonuses++) {
-            if (allBonuses[bonuses].x == obj.x && allBonuses[bonuses].y == obj.y) {
-                player.collectBonus(allBonuses[bonuses].type, bonuses);
-            }
-        }
-    },
-    // Player's current level which handles difficulty level according to the player score
-    obj.adjustLevel = function() {
-        obj.level = Math.trunc(obj.score/50) + 1;
-    },
-    // Checks if a tile is empty of enemies
-    obj.isTileEmpty = function(x, y) {
-        var emptyTile = true;
-        if (obj.x == x && obj.y == y) {
-            emptyTile = false;
-        }
-        return emptyTile;
-    },
-    // Fires up when an enemy hits the player
-    obj.playerLoses = function() {
-        // Loses 1 Health unit and returns to the start position
-        obj.health--;
-        obj.x = 3;
-        obj.y = 4;
-        // If Health reaches zero when the player has at least 2 lives, the player loses one life and their health is fully restored
-        if (obj.health == 0 && obj.lives > 1) {
-            obj.health = 5;
-            obj.lives--;
-        // If Health reaches zero when the player is on their last Life, the player loses that life but their Health isn't restored
-        } else if (obj.health == 0 && obj.lives == 1) {
-            obj.lives--;
-        }
-        // Updates the Game Stats on the screen
-        updateGameStats();
-        // If the player runs out of lives, the clock stops, the lose popup is opened, and the high scores calculated and updated on the screen
-        if (obj.lives == 0) {
-            clearInterval(clock);
-            losePopup.create();
-            checkHighScores();
-        }
-    },
-    // Fires up when the player reaches the river
-    obj.playerWins = function() {
-        // When the player reaches the river, they win 1 Life and then return to the start position
-        obj.score += 50;
-        obj.x = 3;
-        obj.y = 4;
-        // Adjusts the game difficulty acording to the player score
-        obj.adjustLevel();
-        // Updates the Game Stats on the screen
-        updateGameStats();
-    },
-    // Start a new game with the same player
-    obj.playAgain = function() {
-        // Reset player values and start a new game
-        obj.health = 5;
-        obj.score = 0;
-        obj.x = 3;
-        obj.y = 4;
-        obj.level = 1;
-        obj.lives = 5;
-        updateGameStats();
-        startClock();
-        closePopup();
-        createNewEnemies();
-        releaseTheEnemies();
-    },
-    // Start a new game with a different player
-    obj.newPlayer = function() {
-        // Reset player values and start a new game
-        obj.health = 5;
-        obj.score = 0;
-        obj.x = 3;
-        obj.y = 4;
-        obj.level = 1;
-        closePopup();
-        gameStartPopup.create();
-    },
-    // Checks the maximum number of bonuses to appear on the screen simultaneously depending on the player difficulty level
-    obj.checkMaxBonuses = function() {
-        if (obj.level < 3) {
-            return 4;
-        } else if (obj.level >= 3 && obj.level < 5) {
-            return 3;
-        } else if (obj.level >= 5 && obj.level < 7) {
-            return 2;
-        } else {
-            return 1;
-        }
-    },
-    // Checks the type of bunus to appear depending on a random seed and the type of bonus' probability to appear
-    obj.checkBonusType = function(seed) {
-            if (seed <= 5) {
-                return 1;
-            } else if (seed > 5 && seed <= 10) {
-                return 5;
-            } else if (seed > 10 && seed <= 20) {
-                return 6;
-            } else if (seed > 20 && seed <= 35) {
-                return 4;
-            } else if (seed > 35 && seed <= 60) {
-                return 3;
-            } else {
-                return 2;
-            }
-    },
-    // Collect a bonus and remove it from view
-    obj.collectBonus = function (type, index) {
-        if (type == 1) {
-            obj.lives++;
-        } else if (type == 2) {
-            obj.score += 5;
-        } else if (type == 3) {
-            obj.score += 10;
-        } else if (type == 4) {
-            obj.score += 20;
-        } else if (type == 5) {
-            obj.health = 5;
-        } else {
-            timer += 10;
-        }
-        updateGameStats();
-        allBonuses.splice(index, 1);
-    },
-    // Checks if a tyle has a bonus or not
-    obj.checkIfTyleIsFull = function(posX, posY) {
-        for (var i = 0; i < allBonuses.length; i++) {
-            if ((allBonuses[i].x == posX && allBonuses[i].y == posY) || (player.x == posX && player.y == posY)) {
-                return true;
-            }
-        }
-    },
-    // Instantiates all bonuses
-    obj.createNewBonuses = function () {
-        allBonuses = [];
-
-        var sprite = {"1": "images/Heart.png",
-                    "2": "images/Gem Blue.png",
-                    "3": "images/Gem Green.png",
-                    "4": "images/Gem Orange.png",
-                    "5": "images/Star.png",
-                    "6": "images/clock.png"};
-
-        var bonusesTimer;
-        bonusesTimer = setInterval(function() {
-            var tileFull = false;
-            var maxBonuses = player.checkMaxBonuses();
-            // Generates a random number that can be -1, 0, or 1 to determine if a bonus is removed, added, or neither
-            var newBonus = Math.floor(3 * Math.random() - 1);
-            // Generates a random seed for determining the kind of bonus coming next
-            var bonusSeed = Math.floor(100 * Math.random());
-            var bonusType = player.checkBonusType(bonusSeed);
-            var posX = Math.floor(5 * Math.random());
-            var posY = Math.floor(5 * Math.random());
-            tileFull = player.checkIfTyleIsFull(posX, posY);
-
-            // Generates a bonus, deletes one, or do nothing, depending on the newBonus result
-            if (newBonus == 1 && allBonuses.length < maxBonuses && !tileFull) {
-                var bonus = new Bonuses(bonusType, sprite[bonusType], posX, posY);
-                allBonuses.push(bonus);
-            } else if (newBonus == -1 && allBonuses.length > 0) {
-                var bonusToDelete = Math.floor(allBonuses.length * Math.random());
-                allBonuses.splice(bonusToDelete, 1);
-            }
-        }, 750);
-    },
     // Renders the player on the screen
     obj.render = function() {
         ctx.drawImage(Resources.get(this.sprite), this.x * 101, this.y * 83 + 40);
     }
 
     return obj;
+};
+
+// Handles allowed pressed keys
+Player.prototype.handleInput = function(keyPressed) {
+  if (keyPressed) {
+    moveX = getMoveCoords(keyPressed)[0];
+    moveY = getMoveCoords(keyPressed)[1];
+  }
+};
+
+// Checks if player enters a tile with a bonus on it and calls the function to collect the bonus if necessary
+Player.prototype.checkForBonus = function() {
+    for (var bonuses = 0; bonuses < allBonuses.length; bonuses++) {
+        if (allBonuses[bonuses].x == this.x && allBonuses[bonuses].y == this.y) {
+            this.collectBonus(allBonuses[bonuses].type, bonuses);
+        }
+    }
+};
+
+// Player's current level which handles difficulty level according to the player score
+Player.prototype.adjustLevel = function() {
+    this.level = Math.trunc(this.score/50) + 1;
+};
+
+// Checks if a tile is empty of enemies
+Player.prototype.isTileEmpty = function(x, y) {
+    var emptyTile = true;
+    if (this.x == x && this.y == y) {
+        emptyTile = false;
+    }
+    return emptyTile;
+};
+
+// Fires up when an enemy hits the player
+Player.prototype.playerLoses = function() {
+    // Loses 1 Health unit and returns to the start position
+    this.health--;
+    this.x = 3;
+    this.y = 4;
+    // If Health reaches zero when the player has at least 2 lives, the player loses one life and their health is fully restored
+    if (this.health == 0 && this.lives > 1) {
+        this.health = 5;
+        this.lives--;
+    // If Health reaches zero when the player is on their last Life, the player loses that life but their Health isn't restored
+    } else if (this.health == 0 && this.lives == 1) {
+        this.lives--;
+    }
+    // Updates the Game Stats on the screen
+    updateGameStats();
+    // If the player runs out of lives, the clock stops, the lose popup is opened, and the high scores calculated and updated on the screen
+    if (this.lives == 0) {
+        clearInterval(clock);
+        losePopup.create();
+        checkHighScores();
+    }
+};
+
+// Fires up when the player reaches the river
+Player.prototype.playerWins = function() {
+    // When the player reaches the river, they win 1 Life and then return to the start position
+    this.score += 50;
+    this.x = 3;
+    this.y = 4;
+    // Adjusts the game difficulty acording to the player score
+    this.adjustLevel();
+    // Updates the Game Stats on the screen
+    updateGameStats();
+};
+
+// Start a new game with the same player
+Player.prototype.playAgain = function() {
+    // Reset player values and start a new game
+    this.health = 5;
+    this.score = 0;
+    this.x = 3;
+    this.y = 4;
+    this.level = 1;
+    this.lives = 5;
+    updateGameStats();
+    startClock();
+    closePopup();
+    createNewEnemies();
+    releaseTheEnemies();
+};
+
+// Start a new game with a different player
+Player.prototype.newPlayer = function() {
+    // Reset player values and start a new game
+    this.health = 5;
+    this.score = 0;
+    this.x = 3;
+    this.y = 4;
+    this.level = 1;
+    closePopup();
+    gameStartPopup.create();
+};
+
+// Checks the maximum number of bonuses to appear on the screen simultaneously depending on the player difficulty level
+Player.prototype.checkMaxBonuses = function() {
+    if (this.level < 3) {
+        return 4;
+    } else if (this.level >= 3 && this.level < 5) {
+        return 3;
+    } else if (this.level >= 5 && this.level < 7) {
+        return 2;
+    } else {
+        return 1;
+    }
+};
+
+// Checks the type of bunus to appear depending on a random seed and the type of bonus' probability to appear
+Player.prototype.checkBonusType = function(seed) {
+        if (seed <= 5) {
+            return 1;
+        } else if (seed > 5 && seed <= 10) {
+            return 5;
+        } else if (seed > 10 && seed <= 20) {
+            return 6;
+        } else if (seed > 20 && seed <= 35) {
+            return 4;
+        } else if (seed > 35 && seed <= 60) {
+            return 3;
+        } else {
+            return 2;
+        }
+};
+
+// Collect a bonus and remove it from view
+Player.prototype.collectBonus = function (type, index) {
+    if (type == 1) {
+        this.lives++;
+    } else if (type == 2) {
+        this.score += 5;
+    } else if (type == 3) {
+        this.score += 10;
+    } else if (type == 4) {
+        this.score += 20;
+    } else if (type == 5) {
+        this.health = 5;
+    } else {
+        timer += 10;
+    }
+    updateGameStats();
+    allBonuses.splice(index, 1);
+};
+
+// Checks if a tyle has a bonus or not
+Player.prototype.checkIfTileIsFull = function(posX, posY) {
+    for (var i = 0; i < allBonuses.length; i++) {
+        if ((allBonuses[i].x == posX && allBonuses[i].y == posY) || (this.x == posX && this.y == posY)) {
+            return true;
+        }
+    }
+};
+
+// Instantiates all bonuses
+Player.prototype.createNewBonuses = function () {
+    allBonuses = [];
+
+    var sprite = {"1": "images/Heart.png",
+                "2": "images/Gem Blue.png",
+                "3": "images/Gem Green.png",
+                "4": "images/Gem Orange.png",
+                "5": "images/Star.png",
+                "6": "images/clock.png"};
+
+    var bonusesTimer;
+    bonusesTimer = setInterval(function() {
+        var tileFull = false;
+        var maxBonuses = player.checkMaxBonuses();
+        // Generates a random number that can be -1, 0, or 1 to determine if a bonus is removed, added, or neither
+        var newBonus = Math.floor(3 * Math.random() - 1);
+        // Generates a random seed for determining the kind of bonus coming next
+        var bonusSeed = Math.floor(100 * Math.random());
+        var bonusType = player.checkBonusType(bonusSeed);
+        var posX = Math.floor(5 * Math.random());
+        var posY = Math.floor(5 * Math.random());
+        tileFull = player.checkIfTileIsFull(posX, posY);
+
+        // Generates a bonus, deletes one, or do nothing, depending on the newBonus result
+        if (newBonus == 1 && allBonuses.length < maxBonuses && !tileFull) {
+            var bonus = new Bonuses(bonusType, sprite[bonusType], posX, posY);
+            allBonuses.push(bonus);
+        } else if (newBonus == -1 && allBonuses.length > 0) {
+            var bonusToDelete = Math.floor(allBonuses.length * Math.random());
+            allBonuses.splice(bonusToDelete, 1);
+        }
+    }, 750);
 };
 
 // Global variable for the player
@@ -339,7 +363,7 @@ function createPopup(width, height, color, type) {
         $(".popup").append(popupHTML);
         $(".popup").css("display", "flex");
     } else if (type == "help") {
-        var popupHTML = "<div class='popupContainer'><h1>Bug Attack</h1><h2> 1. Contents</h2><ol><li>Contents</li><li>Installation</li><li>Game play</li><li>Known issues</li><li>Version</li></ol><h2> 2. Installation</h2><p>Copy the folder and all its contents to any location in your computer and open “index.html” to run it.</p><h2> 3. Game play</h2><p>It’s a very hot day and you are desperate for a swim in the fresh water of the river on the other side of the road. You have to cross the road and avoid the killer bugs racing across it. If they get you, you lose precious health and are thrown back to your starting location. To make things worse, you’ll be running against a clock, and as soon as that timer reaches zero, you will lose one life.<br>Lose enough health and you end up losing one of your lives. To spice it up, random bonuses appear out of nowhere on the middle of the road for you to catch. Three kinds of gemstones. A blue one, and the most common, will give you a mere 5 points. A green one, a little less common, will give you 10 points. And an orange one, which will give you 20 points. There are also bonuses that will give you 10 extra time units, but these are rarer. Rarer still are the stars, which will fully restore your health. But the rarest bonus of all is the heart, which gives you an extra life.<br>Despite all these obstacles, you are desperate for that river, and each time you reach it you get 50 points. It’s just a shame that once you do, you’ll be catapulted back to the other side of the road again. <br>Good luck on your quest. And keep in mind that the more points you get the more difficult it will get to cross that road.<br><a href='https://github.com/MigP/Bug-Attack' target='_blank'>Bug Attack on GitHub</a><br></p><h2> 4. Known issues</h2><p>As of now, there aren’t any that I know of.</p><h2> 5. Version</h2><p>1.0</p></div><button id='help-close-button' class='button' onclick='closeHelp();'>Close</button>";
+        var popupHTML = "<div class='popupContainer'><h1>Bug Attack</h1><h2> 1. Contents</h2><ol><li>Contents</li><li>Installation</li><li>Game play</li><li>Known issues</li><li>Version</li></ol><h2> 2. Installation</h2><p>Copy the folder and all its contents to any location in your computer and open “index.html” to run it.</p><h2> 3. Game play</h2><p>It’s a very hot day and you are desperate for a swim in the fresh water of the river on the other side of the road. You have to cross the road and avoid the killer bugs racing across it. If they get you, you lose precious health and are thrown back to your starting location. To make things worse, you’ll be running against a clock, and as soon as that timer reaches zero, you will lose one life.<br>Lose enough health and you end up losing one of your lives. To spice it up, random bonuses appear out of nowhere on the middle of the road for you to catch. Three kinds of gemstones. A blue one, and the most common, will give you a mere 5 points. A green one, a little less common, will give you 10 points. And an orange one, which will give you 20 points. There are also bonuses that will give you 10 extra time units, but these are rarer. Rarer still are the stars, which will fully restore your health. But the rarest bonus of all is the heart, which gives you an extra life.<br>Despite all these obstacles, you are desperate for that river, and each time you reach it you get 50 points. It’s just a shame that once you do, you’ll be catapulted back to the other side of the road again. <br>Good luck on your quest. And keep in mind that the more points you get the more difficult it will get to cross that road.<br><a href='https://github.com/MigP/Bug-Attack' target='_blank'>Bug Attack on GitHub</a><br><br><a href='https://migp.github.io/Bug-Attack/' target='_blank'>GitHub Live Demo</a><br></p><h2> 4. Known issues</h2><p>As of now, there aren’t any that I know of.</p><h2> 5. Version</h2><p>1.0</p></div><button id='help-close-button' class='button' onclick='closeHelp();'>Close</button>";
         $(".popup").append(popupHTML);
         $(".popup").find("p").css("color", "black");
         $(".popup").find("p").css("text-shadow", "none");
