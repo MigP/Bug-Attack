@@ -330,6 +330,7 @@ var popupStyle = function(color, width, height, type) {
 
 // Different types of popups are created
 var gameStartPopup = popupStyle('white', 540, 460, "start"),
+handheldPopup = popupStyle('white', 540, 460, "handheld"),
 helpPopup = popupStyle('skyblue', 650, 550, "help"),
 losePopup = popupStyle('salmon', 400, 275, "lose");
 
