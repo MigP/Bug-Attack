@@ -68,17 +68,21 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        gameStartPopup.create();
-        var delayInit;
+        if (!isMobile) {
+            gameStartPopup.create();
+            var delayInit;
 
-        // Delays the start of the game until a character has been chosen
-        delayInit = setInterval(function() {
-            if (player.sprite != "") {
-                lastTime = Date.now();
-                clearInterval(delayInit);
-                main();
-            }
-        }, 500);
+            // Delays the start of the game until a character has been chosen
+            delayInit = setInterval(function() {
+                if (player.sprite != "") {
+                    lastTime = Date.now();
+                    clearInterval(delayInit);
+                    main();
+                }
+            }, 500);
+        } else {
+            handheldPopup.create();
+        }
     }
 
     /* This function is called by main (our game loop) and itself calls all
